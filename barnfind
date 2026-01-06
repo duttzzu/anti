@@ -4,10 +4,11 @@
 local VenyxLibrary = loadstring(game:HttpGet(
     "https://raw.githubusercontent.com/Documantation12/Universal-Vehicle-Script/main/Library.lua"
 ))()
-local Venyx = VenyxLibrary.new("fl3x9 script yes barnfind", 5013109572)
+local Venyx = VenyxLibrary.new("fl3x9 the best yes barnfind script", 5013109572)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local VirtualUser = game:GetService("VirtualUser")  -- For Anti-AFK
 local LocalPlayer = Players.LocalPlayer
 
 -- =====================================
@@ -34,8 +35,9 @@ local WAIT_AFTER_ARRIVE = 1
 local HOLD_TIME = 3
 local PROMPT_RADIUS = 25
 local autoBarnfind = false
+local antiAFK = false  -- Anti-AFK toggle state
 
--- 6 LOCATIONS
+-- 7 LOCATIONS (added your new one)
 local BarnfindSpawns = {
     Vector3.new(3794.1907, 52.3046, -3624.2534),
     Vector3.new(3013.6133, 49.8131, 4158.8926),
@@ -43,6 +45,7 @@ local BarnfindSpawns = {
     Vector3.new(1120.7579, 49.7750, 566.6824),
     Vector3.new(6529.3638, 25.6505, -148.4449),
     Vector3.new(13699.7861, -3.4199, -681.0866),
+    Vector3.new(36375.40234375, 221.4792938232422, 1202.0255126953125),  -- New location
 }
 
 -- =====================================
@@ -50,27 +53,30 @@ local BarnfindSpawns = {
 -- =====================================
 local barnPage = Venyx:addPage("Barnfind", 8356815386)
 local barnMain = barnPage:addSection("Auto Barnfind")
+local antiAFKSection = barnPage:addSection("Anti-AFK")  -- New section
 local barnTune = barnPage:addSection("Tuning")
 
 barnMain:addToggle("Enable Auto Barnfind", false, function(v)
     autoBarnfind = v
 end)
 
+-- Anti-AFK Toggle
+antiAFKSection:addToggle("Enable Anti-AFK", false, function(v)
+    antiAFK = v
+end)
+
 barnTune:addTextbox("Move Speed (studs/sec)", tostring(MOVE_SPEED), function(v)
     local n = tonumber(v)
     if n then MOVE_SPEED = n end
 end)
-
 barnTune:addTextbox("Arrive Distance", tostring(ARRIVE_DIST), function(v)
     local n = tonumber(v)
     if n then ARRIVE_DIST = n end
 end)
-
 barnTune:addTextbox("Wait After Arrive (sec)", tostring(WAIT_AFTER_ARRIVE), function(v)
     local n = tonumber(v)
     if n then WAIT_AFTER_ARRIVE = n end
 end)
-
 barnTune:addTextbox("Hold E Time (sec)", tostring(HOLD_TIME), function(v)
     local n = tonumber(v)
     if n then HOLD_TIME = n end
@@ -111,26 +117,34 @@ local function findPrompt()
 end
 
 -- =====================================
+-- ANTI-AFK
+-- =====================================
+LocalPlayer.Idled:Connect(function()
+    if antiAFK then
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end
+end)
+
+-- =====================================
 -- MAIN LOOP
 -- =====================================
 task.spawn(function()
     while true do
         task.wait(0.5)
         if not autoBarnfind then continue end
-        
+       
         for _, pos in ipairs(BarnfindSpawns) do
             if not autoBarnfind then break end
-            
+           
             moveTo(pos)
             task.wait(WAIT_AFTER_ARRIVE)
-            
+           
             local prompt = findPrompt()
             if prompt then
                 fireproximityprompt(prompt, HOLD_TIME)
-                task.wait(HOLD_TIME + 1)  -- Extra wait to let the prompt disappear/respawn
-                
+                task.wait(HOLD_TIME + 1)
                 warn("[Barnfind] Collected at position: " .. tostring(pos))
-                -- No autoBarnfind = false here -> keeps looping forever until toggled off
             end
         end
     end
