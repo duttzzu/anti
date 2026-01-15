@@ -1,0 +1,146 @@
+local VenyxLibrary = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/Documantation12/Universal-Vehicle-Script/main/Library.lua"
+))()
+local Venyx = VenyxLibrary.new("VGT TUNE TOP SECRET", 5013109572)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+-- THEME
+local Theme = {
+	Background = Color3.fromRGB(61, 60, 124),
+	Glow = Color3.fromRGB(60, 63, 221),
+	Accent = Color3.fromRGB(55, 52, 90),
+	LightContrast = Color3.fromRGB(64, 65, 128),
+	DarkContrast = Color3.fromRGB(32, 33, 64),
+	TextColor = Color3.fromRGB(255, 255, 255)
+}
+
+for i, v in pairs(Theme) do
+	pcall(Venyx.setTheme, Venyx, i, v)
+end
+
+-- VEHICLE FINDER
+local function GetVehicleFromDescendant(d)
+	return
+		d:FindFirstAncestor(LocalPlayer.Name .. "'s Car") or
+		(d:FindFirstAncestor("Body") and d:FindFirstAncestor("Body").Parent) or
+		(d:FindFirstAncestor("Misc") and d:FindFirstAncestor("Misc").Parent) or
+		d:FindFirstAncestorWhichIsA("Model")
+end
+
+-- UI
+local vehiclePage = Venyx:addPage("Vehicle", 8356815386)
+local usageSection = vehiclePage:addSection("Usage")
+
+local velocityEnabled = true
+usageSection:addToggle("Keybinds Active", true, function(v)
+	velocityEnabled = v
+end)
+
+-- =========================
+-- ACCELERATION (TUNABLE VIA TEXT)
+-- =========================
+local speedSection = vehiclePage:addSection("Acceleration")
+local tuningSection = vehiclePage:addSection("Speed Tuning")
+
+-- defaults
+local MAX_SPEED = 1000       -- studs/sec (~340 mph)
+local ACCEL_PER_SEC = 200    -- acceleration strength
+
+-- text input: max speed (no clamp)
+tuningSection:addTextbox("Max Speed (studs/sec)", tostring(MAX_SPEED), function(v)
+	local n = tonumber(v)
+	if n then
+		MAX_SPEED = n
+	end
+end)
+
+-- text input: acceleration power (no clamp)
+tuningSection:addTextbox("Acceleration Power", tostring(ACCEL_PER_SEC), function(v)
+	local n = tonumber(v)
+	if n then
+		ACCEL_PER_SEC = n
+	end
+end)
+
+local accelKey = Enum.KeyCode.W
+speedSection:addKeybind("Smooth Acceleration", accelKey, function() end)
+
+RunService.Heartbeat:Connect(function(dt)
+	if not velocityEnabled then return end
+	if not UserInputService:IsKeyDown(accelKey) then return end
+
+	local char = LocalPlayer.Character
+	if not char then return end
+
+	local hum = char:FindFirstChildWhichIsA("Humanoid")
+	if not hum or not hum.SeatPart then return end
+
+	local seat = hum.SeatPart
+	if not seat:IsA("VehicleSeat") then return end
+
+	local vel = seat.AssemblyLinearVelocity
+	local forward = seat.CFrame.LookVector
+
+	local forwardSpeed = vel:Dot(forward)
+	if forwardSpeed <= 1 or forwardSpeed >= MAX_SPEED then return end
+
+	local ratio = forwardSpeed / MAX_SPEED
+	local curve = 1 - (ratio ^ 1.5)
+
+	local accel = ACCEL_PER_SEC * curve * dt
+	local add = math.min(accel, MAX_SPEED - forwardSpeed)
+
+	seat.AssemblyLinearVelocity += forward * add
+end)
+
+-- =========================
+-- BRAKING (UNCHANGED)
+-- =========================
+local brakeSection = vehiclePage:addSection("Deceleration")
+
+local brakeKey = Enum.KeyCode.S
+local brakeForce = 0.15
+
+brakeSection:addSlider("Brake Force (Thousandths)", 150, 0, 300, function(v)
+	brakeForce = v / 1000
+end)
+
+brakeSection:addKeybind("Quick Brake", brakeKey, function()
+	if not velocityEnabled then return end
+
+	while UserInputService:IsKeyDown(brakeKey) do
+		task.wait()
+		local char = LocalPlayer.Character
+		if not char then break end
+
+		local hum = char:FindFirstChildWhichIsA("Humanoid")
+		if hum and hum.SeatPart then
+			local seat = hum.SeatPart
+			seat.AssemblyLinearVelocity *= Vector3.new(1 - brakeForce, 1, 1 - brakeForce)
+		end
+	end
+end)
+
+brakeSection:addKeybind("Stop Vehicle", Enum.KeyCode.P, function()
+	local char = LocalPlayer.Character
+	if not char then return end
+
+	local hum = char:FindFirstChildWhichIsA("Humanoid")
+	if hum and hum.SeatPart then
+		hum.SeatPart.AssemblyLinearVelocity = Vector3.zero
+		hum.SeatPart.AssemblyAngularVelocity = Vector3.zero
+	end
+end)
+
+-- =========================
+-- GUI TOGGLE
+-- =========================
+UserInputService.InputBegan:Connect(function(input, gp)
+	if not gp and input.KeyCode == Enum.KeyCode.RightBracket then
+		Venyx:toggle()
+	end
+end)
