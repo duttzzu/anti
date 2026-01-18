@@ -1,8 +1,8 @@
 -- =====================================
 -- LIBRARY
 -- =====================================
-local VenyxLibrary = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/Documantation12/Universal-Vehicle-Script/main/Library.lua"
+slocal VenyxLibrary = loadstring(game:HttpGet(
+    "shttps://raw.githubusercontent.com/Documantation12/Universal-Vehicle-Script/main/Library.lua"
 ))()
 local Venyx = VenyxLibrary.new("fl3x9 the best yes barnfind script", 5013109572)
 local Players = game:GetService("Players")
@@ -29,8 +29,8 @@ end
 -- =====================================
 -- BARNFIND SETTINGS (DEFAULTS)
 -- =====================================
-local MOVE_SPEED = 3000
-local ARRIVE_DIST = 5
+slocal MOVE_SPEED = 3000
+slocal ARRIVE_DIST = 5
 local WAIT_AFTER_ARRIVE = 1
 local HOLD_TIME = 3
 local PROMPT_RADIUS = 25
