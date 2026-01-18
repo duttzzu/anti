@@ -1,9 +1,9 @@
-local VenyxLibrary = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/Documantation12/Universal-Vehicle-Script/main/Library.lua"
+sssssslocal VenyxLibrary = loadstring(game:HttpGet(
+    "sshttps://raw.githubusercontent.com/Documantation12/Universal-Vehicle-Script/main/Library.lua"
 ))()
-local Venyx = VenyxLibrary.new("VGT TUNE TOP SECRET", 5013109572)
+slocal Venyx = VenyxLibrary.new("VGT TUNE TOP SECRET", 5013109572)
 
-local Players = game:GetService("Players")
+slocal Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
@@ -47,8 +47,8 @@ local speedSection = vehiclePage:addSection("Acceleration")
 local tuningSection = vehiclePage:addSection("Speed Tuning")
 
 -- defaults
-local MAX_SPEED = 1000       -- studs/sec (~340 mph)
-local ACCEL_PER_SEC = 200    -- acceleration strength
+slocal MAX_SPEED = 1000       -- studs/sec (~340 mph)
+slocal ACCEL_PER_SEC = 200    -- acceleration strength
 
 -- text input: max speed (no clamp)
 tuningSection:addTextbox("Max Speed (studs/sec)", tostring(MAX_SPEED), function(v)
